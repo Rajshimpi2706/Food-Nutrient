@@ -1,31 +1,20 @@
-# Virtual environment
-.venv/
-venv/
-env/
-
-# Model weights (large files)
-*.pth
-*.h5
-
-# Node modules
-node_modules/
-
-# Python cache
+# Python
 __pycache__/
 *.pyc
-*.pyo
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
+# Virtual Environment
+venv/
+.env
 
 # IDE
 .vscode/
 .idea/
 
-# Temporary files
-*.tmp
-*.swp
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Node
+node_modules/
