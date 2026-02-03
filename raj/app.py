@@ -2,7 +2,8 @@ import os
 import tempfile
 import requests
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from imageai.Classification import ImageClassification
 import uvicorn
@@ -18,6 +19,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ------------------ USDA CONFIG ------------------
 USDA_API_KEY = os.getenv("USDA_API_KEY", "PjcAGiGcTDQiMsiTSFbfR5rIvo8cd0SFUGQIkRP1")
@@ -93,8 +97,8 @@ def extract_nutrients(data):
 
 # ------------------ ROUTES ------------------
 @app.get("/")
-def root():
-    return {"message": "Fruit Nutrition Detection API is running. Use /docs"}
+def home():
+    return FileResponse("static/index.html")
 
 @app.post("/fruit-detection")
 async def fruit_detection(file: UploadFile = File(...)):

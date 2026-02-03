@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FruitNutrition Detector - AI-Powered Nutrition Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Navigation */
+        nav {
+            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(34, 211, 238, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #22d3ee, #06b6d4);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed rgba(34, 211, 238, 0.3);
+            transition: all 0.3s ease;
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-zone:hover {
+            border-color: #22d3ee;
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(34, 211, 238, 0.1);
+        }
+
+        .upload-zone.dragover {
+            border-color: #06b6d4;
+            background: rgba(6, 182, 212, 0.1);
+            transform: scale(1.02);
+        }
+
+        /* Scanning Animation */
+        @keyframes scan {
+            0%, 100% { transform: translateY(-100%); }
+            50% { transform: translateY(100%); }
+        }
+
+        .scan-line {
+            animation: scan 2s ease-in-out infinite;
+            background: linear-gradient(180deg, transparent, #22d3ee, transparent);
+            height: 4px;
+            width: 100%;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(34, 211, 238, 0.6); }
+        }
+
+        .scanning-container {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        /* Progress Bar */
+        @keyframes progress {
+            from { width: 0%; }
+        }
+
+        .progress-bar {
+            animation: progress 2s ease-out forwards;
+            background: linear-gradient(90deg, #22d3ee, #06b6d4, #0891b2);
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .progress-bar.active {
+            animation: progress 2s ease-out forwards, shimmer 1.5s ease-in-out infinite;
+        }
+
+        /* Cards */
+        .feature-card, .step-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover, .step-card:hover {
+            transform: translateY(-10px);
+            border-color: #22d3ee;
+            box-shadow: 0 20px 40px rgba(34, 211, 238, 0.2);
+        }
+
+        .feature-card .icon-circle, .step-card .icon-circle {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(6, 182, 212, 0.2));
+            border: 2px solid rgba(34, 211, 238, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .icon-circle, .step-card:hover .icon-circle {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.4), rgba(6, 182, 212, 0.4));
+            border-color: #22d3ee;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Nutrition Card */
+        .nutrition-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nutrient-item {
+            background: rgba(15, 23, 42, 0.5);
+            border-left: 3px solid #22d3ee;
+            transition: all 0.3s ease;
+        }
+
+        .nutrient-item:hover {
+            background: rgba(15, 23, 42, 0.8);
+            border-left-color: #06b6d4;
+            transform: translateX(5px);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #22d3ee, #06b6d4);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(34, 211, 238, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(34, 211, 238, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Social Icons */
+        .social-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 2px solid rgba(34, 211, 238, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: linear-gradient(135deg, #22d3ee, #06b6d4);
+            border-color: #22d3ee;
+            transform: translateY(-5px) rotate(5deg);
+            box-shadow: 0 10px 20px rgba(34, 211, 238, 0.3);
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #22d3ee, #06b6d4);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #06b6d4, #0891b2);
+        }
+
+        /* Confidence Progress Bar */
+        .confidence-progress {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22d3ee, #06b6d4);
+            border-radius: 9999px;
+            transition: width 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confidence-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shine 2s ease-in-out infinite;
+        }
+
+        @keyframes shine {
+            to { left: 200%; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-apple-alt text-3xl text-cyan-400"></i>
+                    <span class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-cyan-600 bg-clip-text text-transparent">
+                        FruitNutrition
+                    </span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="nav-link text-gray-300 hover:text-cyan-400">Home</a>
+                    <a href="#upload" class="nav-link text-gray-300 hover:text-cyan-400">Upload Image</a>
+                    <a href="#how-it-works" class="nav-link text-gray-300 hover:text-cyan-400">How It Works</a>
+                    <a href="#contact" class="nav-link text-gray-300 hover:text-cyan-400">Contact</a>
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden text-cyan-400">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-3">
+                <a href="#home" class="block text-gray-300 hover:text-cyan-400">Home</a>
+                <a href="#upload" class="block text-gray-300 hover:text-cyan-400">Upload Image</a>
+                <a href="#how-it-works" class="block text-gray-300 hover:text-cyan-400">How It Works</a>
+                <a href="#contact" class="block text-gray-300 hover:text-cyan-400">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient min-h-screen flex items-center justify-center pt-20 px-6">
+        <div class="container mx-auto text-center">
+            <div class="float-animation inline-block mb-6">
+                <i class="fas fa-apple-alt text-8xl text-cyan-400"></i>
+            </div>
+            <h1 class="hero-title text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 bg-clip-text text-transparent">
+                AI-Powered Nutrition Analysis
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 mb-8 max-w-3xl mx-auto">
+                Discover the nutritional value of your food instantly with advanced AI technology
+            </p>
+            <a href="#upload" class="btn-primary inline-block px-8 py-4 rounded-full text-white font-semibold text-lg">
+                Get Started <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload" class="py-20 px-6">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 text-cyan-400">
+                Upload Your Food Image
+            </h2>
+            <p class="text-center text-gray-400 mb-12 text-lg">
+                Simply upload an image and let our AI analyze the nutritional content
+            </p>
+
+            <!-- Upload Zone -->
+            <div id="upload-zone" class="upload-zone rounded-2xl p-12 text-center cursor-pointer">
+                <div id="upload-content">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-cyan-400 mb-4"></i>
+                    <h3 class="text-2xl font-semibold mb-2 text-gray-200">Drag & Drop or Click to Upload</h3>
+                    <p class="text-gray-400">Supports: JPG, PNG, JPEG</p>
+                    <input type="file" id="file-input" accept="image/*" class="hidden">
+                </div>
+
+                <!-- Scanning State -->
+                <div id="scanning-state" class="hidden">
+                    <div class="scanning-container rounded-xl p-8 relative overflow-hidden">
+                        <div class="scan-line absolute left-0 right-0"></div>
+                        <img id="preview-image" class="max-w-full max-h-64 mx-auto rounded-lg mb-4">
+                        <div class="spinner border-4 border-cyan-400 border-t-transparent rounded-full w-12 h-12 mx-auto mb-4"></div>
+                        <h3 class="text-2xl font-semibold text-cyan-400 mb-2">Analyzing Image...</h3>
+                        <p class="text-gray-400 mb-4">Our AI is detecting and analyzing the nutritional content</p>
+                        
+                        <!-- Progress Bar -->
+                        <div class="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                            <div id="progress-bar" class="progress-bar h-full" style="width: 0%"></div>
+                        </div>
+                        <p id="progress-text" class="text-sm text-gray-400 mt-2">0%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-section" class="hidden mt-12">
+                <div class="nutrition-card rounded-2xl p-8 shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-3xl font-bold text-cyan-400" id="detected-fruit">Apple</h3>
+                            <p class="text-gray-400">Detected Food Item</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-400 mb-2">Confidence</div>
+                            <div class="w-48 h-4 confidence-progress">
+                                <div id="confidence-fill" class="confidence-fill" style="width: 0%">
+                                    <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
+                                        <span id="confidence-text">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="nutrient-item rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-fire text-orange-400 text-2xl"></i>
+                                    <span class="text-gray-300">Energy</span>
+                                </div>
+                                <span class="text-2xl font-bold text-cyan-400" id="energy-value">52 kcal</span>
+                            </div>
+                        </div>
+
+                        <div class="nutrient-item rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-dumbbell text-red-400 text-2xl"></i>
+                                    <span class="text-gray-300">Protein</span>
+                                </div>
+                                <span class="text-2xl font-bold text-cyan-400" id="protein-value">0.3 g</span>
+                            </div>
+                        </div>
+
+                        <div class="nutrient-item rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-cheese text-yellow-400 text-2xl"></i>
+                                    <span class="text-gray-300">Fat</span>
+                                </div>
+                                <span class="text-2xl font-bold text-cyan-400" id="fat-value">0.2 g</span>
+                            </div>
+                        </div>
+
+                        <div class="nutrient-item rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-bread-slice text-amber-400 text-2xl"></i>
+                                    <span class="text-gray-300">Carbs</span>
+                                </div>
+                                <span class="text-2xl font-bold text-cyan-400" id="carbs-value">14 g</span>
+                            </div>
+                        </div>
+
+                        <div class="nutrient-item rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-seedling text-green-400 text-2xl"></i>
+                                    <span class="text-gray-300">Fiber</span>
+                                </div>
+                                <span class="text-2xl font-bold text-cyan-400" id="fiber-value">2.4 g</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="upload-another" class="btn-primary w-full py-3 rounded-full text-white font-semibold">
+                        <i class="fas fa-redo mr-2"></i> Analyze Another Image
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 px-6 bg-gradient-to-b from-slate-900 to-slate-800">
+        <div class="container mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4 text-cyan-400">
+                How It Works
+            </h2>
+            <p class="text-center text-gray-400 mb-16 text-lg max-w-2xl mx-auto">
+                Our advanced AI technology makes nutrition analysis simple and accurate
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+                <!-- Step 1 -->
+                <div class="step-card rounded-2xl p-8 text-center">
+                    <div class="icon-circle w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-key text-3xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-cyan-400">Step 1</h3>
+                    <h4 class="text-lg font-semibold mb-3 text-gray-200">Upload Image</h4>
+                    <p class="text-gray-400">Upload or drag & drop your food image into the secure checker</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="step-card rounded-2xl p-8 text-center">
+                    <div class="icon-circle w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-3xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-cyan-400">Step 2</h3>
+                    <h4 class="text-lg font-semibold mb-3 text-gray-200">AI Analysis</h4>
+                    <p class="text-gray-400">Our algorithm detects the food and analyzes its composition in real-time</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step-card rounded-2xl p-8 text-center">
+                    <div class="icon-circle w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-database text-3xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-cyan-400">Step 3</h3>
+                    <h4 class="text-lg font-semibold mb-3 text-gray-200">USDA Database</h4>
+                    <p class="text-gray-400">Fetches accurate nutritional data from the official USDA database</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="step-card rounded-2xl p-8 text-center">
+                    <div class="icon-circle w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-lightbulb text-3xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-cyan-400">Step 4</h3>
+                    <h4 class="text-lg font-semibold mb-3 text-gray-200">Get Results</h4>
+                    <p class="text-gray-400">Receive detailed nutritional information and health insights instantly</p>
+                </div>
+            </div>
+
+            <!-- Importance Section -->
+            <div class="feature-card rounded-2xl p-12 text-center max-w-4xl mx-auto">
+                <i class="fas fa-heartbeat text-6xl text-red-400 mb-6"></i>
+                <h3 class="text-3xl font-bold mb-4 text-cyan-400">Why Nutrition Matters</h3>
+                <p class="text-gray-300 text-lg leading-relaxed">
+                    Understanding the nutritional content of your food is crucial for maintaining a healthy lifestyle. 
+                    Our AI-powered tool helps you make informed dietary choices by providing instant, accurate nutritional 
+                    information. Whether you're managing your weight, tracking macros, or simply curious about what you eat, 
+                    our technology empowers you to take control of your health journey.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-16 text-cyan-400">
+                Features
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="feature-card rounded-2xl p-8 text-center">
+                    <div class="icon-circle w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-database text-3xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-200">USDA Integration</h3>
+                    <p class="text-gray-400">Access to official USDA nutritional database for accurate information</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card rounded-2xl p-8 text-center">
+                    <div class="icon-circle w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-heartbeat text-3xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-200">Real-time Analysis</h3>
+                    <p class="text-gray-400">Instant nutritional breakdown with confidence scoring</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card rounded-2xl p-8 text-center">
+                    <div class="icon-circle w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-clock text-3xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-200">Fast Processing</h3>
+                    <p class="text-gray-400">Get results in seconds with our optimized AI pipeline</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card rounded-2xl p-8 text-center">
+                    <div class="icon-circle w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-comments text-3xl text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-200">Detailed Insights</h3>
+                    <p class="text-gray-400">Comprehensive breakdown of calories, macros, and micronutrients</p>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="mt-16 max-w-4xl mx-auto">
+                <div class="feature-card rounded-2xl p-8">
+                    <div class="flex items-start space-x-4">
+                        <i class="fas fa-shield-alt text-3xl text-cyan-400 mt-1"></i>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-gray-200">
+                                <i class="fas fa-lock mr-2"></i>Security Notice
+                            </h3>
+                            <p class="text-gray-400 leading-relaxed">
+                                Your privacy is our priority. Images are processed securely and are not stored on our servers. 
+                                All analysis is performed in real-time, and your data is immediately discarded after processing. 
+                                We use industry-standard encryption to protect your information.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact/Footer Section -->
+    <section id="contact" class="py-20 px-6 bg-gradient-to-b from-slate-900 to-slate-950">
+        <div class="container mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 text-cyan-400">
+                Ready to Analyze Your Food?
+            </h2>
+            <p class="text-xl text-gray-400 mb-12">
+                Join thousands of users making healthier choices with AI
+            </p>
+
+            <a href="#upload" class="btn-primary inline-block px-8 py-4 rounded-full text-white font-semibold text-lg mb-16">
+                Start Now <i class="fas fa-arrow-up ml-2"></i>
+            </a>
+
+            <!-- Social Links -->
+            <div class="flex justify-center space-x-6 mb-12">
+                <a href="https://www.linkedin.com/in/raj-shimpi-a224b6213/" target="_blank" class="social-icon rounded-full flex items-center justify-center">
+                    <i class="fab fa-linkedin-in text-2xl text-cyan-400"></i>
+                </a>
+                <a href="https://github.com/Rajshimpi2706" target="_blank" class="social-icon rounded-full flex items-center justify-center">
+                    <i class="fab fa-github text-2xl text-cyan-400"></i>
+                </a>
+                <a href="https://www.instagram.com/raj_27_06" target="_blank" class="social-icon rounded-full flex items-center justify-center">
+                    <i class="fab fa-instagram text-2xl text-cyan-400"></i>
+                </a>
+            </div>
+
+            <div class="border-t border-gray-700 pt-8">
+                <p class="text-gray-500">
+                    © 2026 FruitNutrition Detector. Powered by AI & USDA Database.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Navigation Scroll Effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Upload Functionality
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadContent = document.getElementById('upload-content');
+        const scanningState = document.getElementById('scanning-state');
+        const resultsSection = document.getElementById('results-section');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const previewImage = document.getElementById('preview-image');
+        const uploadAnotherBtn = document.getElementById('upload-another');
+
+        // Click to upload
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleFileUpload(file);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file);
+            }
+        });
+
+        async function handleFileUpload(file) {
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Show scanning state
+            uploadContent.classList.add('hidden');
+            scanningState.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+
+            // Show progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = progress + '%';
+            }, 100);
+
+            try {
+                // Send file to backend API
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('http://localhost:5002/fruit-detection', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Complete progress
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                progressText.textContent = '100%';
+
+                // Display results
+                setTimeout(() => {
+                    displayResults(data);
+                }, 500);
+
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                clearInterval(progressInterval);
+                alert('Error processing image. Please try again.');
+                // Reset to upload state
+                uploadContent.classList.remove('hidden');
+                scanningState.classList.add('hidden');
+                resultsSection.classList.add('hidden');
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+            }
+        }
+
+
+
+        function displayResults(data) {
+            // Hide scanning, show results
+            scanningState.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+
+            // Update detected fruit
+            document.getElementById('detected-fruit').textContent = data.detected_fruit;
+
+            // Animate confidence bar
+            const confidenceFill = document.getElementById('confidence-fill');
+            const confidenceText = document.getElementById('confidence-text');
+            setTimeout(() => {
+                confidenceFill.style.width = data.confidence + '%';
+                confidenceText.textContent = data.confidence.toFixed(1) + '%';
+            }, 100);
+
+            // Update nutrition values
+            const nutrients = data.nutrition_info.nutrients;
+            document.getElementById('energy-value').textContent = (nutrients["Energy"] || 0) + ' kcal';
+            document.getElementById('protein-value').textContent = (nutrients["Protein"] || 0) + ' g';
+            document.getElementById('fat-value').textContent = (nutrients["Total lipid (fat)"] || 0) + ' g';
+            document.getElementById('carbs-value').textContent = (nutrients["Carbohydrate, by difference"] || 0) + ' g';
+            document.getElementById('fiber-value').textContent = (nutrients["Fiber, total dietary"] || 0) + ' g';
+
+            // Scroll to results
+            setTimeout(() => {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 200);
+        }
+
+        uploadAnotherBtn.addEventListener('click', () => {
+            // Reset to upload state
+            uploadContent.classList.remove('hidden');
+            scanningState.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+            fileInput.value = '';
+            
+            // Scroll to upload section
+            document.getElementById('upload').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
